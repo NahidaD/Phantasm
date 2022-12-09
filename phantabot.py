@@ -9,7 +9,7 @@ from telethon import Button
 
 api_id = '19084340'
 api_hash = 'ddea16f6eecce0a0276c611086ff50f8'
-bt = '5751632236:AAFA2qT5N24UUWBRRpO1eptQmGxI7NvonUI'
+bt = '5009768358:AAGNbzEfUldjFUvAeyhwpO07BnuJx1b58L4'
 cc_regex = '(?:^|.*?[^\d])((\d+?)\|(\d{2})\|(\d{2,4}?)\|(\d{3,4}?))'
 checkerkey=[]
 superuser = [702792106,1687593507,5164193745] #whocan add sks and remove sks
