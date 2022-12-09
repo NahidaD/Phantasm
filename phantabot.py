@@ -1,10 +1,6 @@
-from http.client import responses
 from random import randint
-import string,random,asyncio,logging,os,requests,json,stripe,re,time
-import telethon
-from telethon.sessions import StringSession
-from telethon.sync import TelegramClient, errors, events
-from telethon import Button
+import requests,stripe,re
+from telethon.sync import TelegramClient,events
 
 
 api_id = '19084340'
